@@ -7,12 +7,12 @@ x=grid.xMin:grid.epsylon:grid.xMax;
 y=grid.yMin:grid.epsylon:grid.yMax;
 
 %uniform vectorfield
-% vx=-y./y;
-% vy=x./x;
-%vx=-y;
-%vy=x;
-vx=sin(y)*0.3;
-vy=cos(x)*0.2;
+%vx=-y./y;
+%vy=x./x;
+vx=-y;
+vy=x;
+%vx=sin(y)*0.3;
+%vy=cos(x)*0.2;
 
 [x,y]=meshgrid(x,y);
 
@@ -74,6 +74,7 @@ cfg.swarm(:, 7)=1000;
 
 cfg.swarmVel =cfg.swarm;
 cfg.swarmVelo = cfg.swarm;
+countera=0;
 for iter = 1:cfg.iterations
     
     for i= 1:cfg.swarmSize
@@ -101,15 +102,24 @@ for iter = 1:cfg.iterations
         if(tmpsvx>0 &&tmpsvy >0 && tmpsvx<20 && tmpsvy<20)
             mat2(tmpsvx,tmpsvy)=mat2(tmpsvx,tmpsvy)+1;
         end
-        %x(t+1)=v(t+1)+x(t)
         
-        if(cfg.swarmVel(i,1)<0 || cfg.swarmVel(i,1)>20)
-            cfg.swarmVel(i,1)=randi([0, 20]);
-            cfg.swarmVel(i,2)=randi([0, 20]);
+        %x(t+1)=v(t+1)+x(t)
+        %Boundary handling, set to random postition
+        %p[rand[0,20],rand[0,20]]
+        if((cfg.swarmVel(i,1)+cfg.swarmVel(i,5))<0 ||(cfg.swarmVel(i,1)+cfg.swarmVel(i,5))>20)
+            cfg.swarmVel(i,1)=randi([0,20]);
         else
-        cfg.swarmVel(i,1) = cfg.swarmVel(i,1)+cfg.swarmVel(i,5);
-        cfg.swarmVel(i,2) = cfg.swarmVel(i,2)+cfg.swarmVel(i,6);
+            cfg.swarmVel(i,1) = cfg.swarmVel(i,1)+cfg.swarmVel(i,5);
         end
+        if((cfg.swarmVel(i,2)+cfg.swarmVel(i,6))<0 ||(cfg.swarmVel(i,2)+cfg.swarmVel(i,6))>20)
+            cfg.swarmVel(i,2)=randi([0,20]);
+        else
+            cfg.swarmVel(i,2) = cfg.swarmVel(i,2)+cfg.swarmVel(i,6);
+        end
+        
+        
+        %        countera=countera+1
+        
         uVel = cfg.swarmVel(i,1);
         vVel = cfg.swarmVel(i,2);
         % Objective function
@@ -131,12 +141,15 @@ for iter = 1:cfg.iterations
         end
         
         %x(t+1)=v(t+1)+x(t)
-        if(cfg.swarmVelo(i,1)<0 || cfg.swarmVelo(i,1)>20)
-            cfg.swarmVelo(i,1)=randi([0, 20]);
-            cfg.swarmVelo(i,2)=randi([0, 20]);
+        if((cfg.swarmVelo(i,1)+cfg.swarmVelo(i,5))<0 ||(cfg.swarmVelo(i,1)+cfg.swarmVelo(i,5))>20)
+            cfg.swarmVelo(i,1)=randi([0,20]);
         else
-        cfg.swarmVelo(i,1) = cfg.swarmVelo(i,1)+cfg.swarmVelo(i,5);
-        cfg.swarmVelo(i,2) = cfg.swarmVelo(i,2)+cfg.swarmVelo(i,6);
+            cfg.swarmVelo(i,1) = cfg.swarmVelo(i,1)+cfg.swarmVelo(i,5);
+        end
+        if((cfg.swarmVelo(i,2)+cfg.swarmVelo(i,6))<0 ||(cfg.swarmVelo(i,2)+cfg.swarmVelo(i,6))>20)
+            cfg.swarmVelo(i,2)=randi([0,20]);
+        else
+            cfg.swarmVelo(i,2) = cfg.swarmVelo(i,2)+cfg.swarmVelo(i,6);
         end
         uVelo = cfg.swarmVelo(i,1);
         vVelo = cfg.swarmVelo(i,2);
@@ -163,12 +176,12 @@ for iter = 1:cfg.iterations
         
         
         
-        if(cfg.swarmVel(i,1) > 0 && cfg.swarmVel(i,1) <=20 && cfg.swarmVel(i,2) > 0 && cfg.swarmVel(i,2) <=20 )
-            [uEst,vEst]=estimateVector(cfg.swarmVel(i,1),cfg.swarmVel(i,2),vx,vy);
-        else
-            uEst=0;
-            vEst=0;
-        end
+        %         if(cfg.swarmVel(i,1) > 0 && cfg.swarmVel(i,1) <=20 && cfg.swarmVel(i,2) > 0 && cfg.swarmVel(i,2) <=20 )
+        [uEst,vEst]=estimateVector(cfg.swarmVel(i,1),cfg.swarmVel(i,2),vx,vy);
+        %         else
+        %             uEst=0;
+        %             vEst=0;
+        %         end
         cfg.swarmVel(i,5) = rand*cfg.inertia*cfg.swarmVel(i,5)+cfg.accelerationCoefficient*rand*(cfg.swarmVel(i,3)...
             -cfg.swarmVel(i,1))+cfg.accelerationCoefficient*rand*(cfg.swarmVel(gbestVel,3)-cfg.swarmVel(i,1))+uEst;
         cfg.swarmVel(i,6) = rand*cfg.inertia*cfg.swarmVel(i,6)+cfg.accelerationCoefficient*rand*(cfg.swarmVel(i,4)...

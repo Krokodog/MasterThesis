@@ -28,7 +28,7 @@ cfg.swarmSize = 20;
 cfg.swarm= zeros(cfg.swarmSize,7);
 cfg.individual = 1;
 %Display each iteration step
-cfg.visualizeSteps = 0;
+cfg.visualizeSteps =1;
 
 %grid
 grid.epsylon=1;
