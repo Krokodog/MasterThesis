@@ -37,7 +37,7 @@ grid.xMax=20;
 grid.yMin=0;
 grid.yMax=20;
 
-[matPos1,matPos2,matPos3]=PSO(cfg,grid);
-visualizeVisitedPositions(matPos1,matPos2,matPos3);
+[matPos1,matPos3]=PSO(cfg,grid);
+visualizeVisitedPositions(matPos1,matPos3);
 
 
