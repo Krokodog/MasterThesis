@@ -1,18 +1,6 @@
-function [mPos1,mPos2] = PSO(cfg,grid)
+function [mPos1,mPos2] = PSO(cfg,grid,x,y,vx,vy,modeVF)
 %PSO Summary of this function goes here
 %   Detailed explanation goes here
-
-% Construct the grid
-x=grid.xMin:grid.epsylon:grid.xMax;
-y=grid.yMin:grid.epsylon:grid.yMax;
-
-%uniform vectorfield
-vx=-y./y;
-vy=x./x;
-%vx=-y;
-%vy=x;
-%vx=sin(y)*0.3;
-%vy=cos(x)*0.2;
 
 [x,y]=meshgrid(x,y);
 
@@ -23,12 +11,26 @@ vSub=2;
 % Sphere Function
 z=(x-uSub).^2 + ( y-vSub).^2;
 
-
+switch modeVF
+    case 1
+        %uniform vectorfield
+        vxC=-y./y;
+        vxC(isnan(vxC))=-1;
+        vyC=x./x;
+        vyC(isnan(vyC))=1;
+    case 2
+        %linear vectorfield
+        vxC=-y;
+        vyC=x;
+    case 3
+        %sincos vectorfield
+        vxC=sin(y)*0.8;
+        vyC=cos(x)*0.8;
+end
 % Vectorfield contour grid
 %a=sin(y)*0.3;
 %b=cos(x)*0.2;
-vxC=-y;
-vyC=x;
+
 
 
 % Visulize the grid cells
@@ -37,11 +39,9 @@ mPos1=zeros(grid.xMax,grid.yMax);
 %real
 mPos2=mPos1;
 
-
 % Initialize the cfg.swarm
 for i = 1:cfg.swarmSize
-    cfg.swarm(cfg.individual, 1:7) = i;
-    cfg.individual = cfg.individual+1;
+    cfg.swarm(i, 1:7) = i;
 end
 % initial velocity u
 cfg.swarm(:, 5)=0;
@@ -161,7 +161,7 @@ for iter = 1:cfg.iterations
         hold on
 
         plot(iter,tmp,'b*')
-        axis([1 50 -1 100]);
+        axis([1 cfg.iterations -1 100]);
       
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
      %   axis equal
@@ -171,7 +171,7 @@ for iter = 1:cfg.iterations
        
         hold on
         plot(iter,tmpV,'b*')
-        axis([1 50 -1 100]);
+        axis([1 cfg.iterations -1 100]);
         
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
       %  axis equal
@@ -186,7 +186,7 @@ for iter = 1:cfg.iterations
 end
 
 if(~cfg.visualizeSteps)
-    visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV)
+    visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV,cfg)
 end
 end
 

@@ -10,7 +10,8 @@ function [] = visualizeVisitedPositions(matPos1,matPos3)
     axis([1 20 1 20]);
     colorbar('Ticks',[0,max(matPos1(:))])
     set(gca,'YDir','normal')
-    
+    ylabel({'y-Axis'})
+    xlabel({'x-Axis'})
     
     subplot(1,2,2)
     imagesc(transpose(matPos3))
@@ -18,6 +19,8 @@ function [] = visualizeVisitedPositions(matPos1,matPos3)
     axis([1 20 1 20]);
     colorbar('Ticks',[0,max(matPos3(:))])
     set(gca,'YDir','normal')
+    ylabel({'y-Axis'})
+    xlabel({'x-Axis'})
     
     set(gcf,'units','normalized','outerposition',[0 0 1 1])
 end

@@ -1,4 +1,4 @@
-function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yMax,a,b,gbests,gbestsV )
+function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yMax,a,b,gbests,gbestsV,cfg)
 %VISUALIZESOLUTION Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -10,6 +10,8 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     hold off
     axis equal
     title('Normal PSO not considering the vectorfield')
+    ylabel({'y-Axis'})
+    xlabel({'x-Axis'})
     
     subplot(2,2,2)
     hold on
@@ -20,27 +22,32 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     hold off
     axis equal
     title('PSO considering the vectorfield')
-    
-    set(gcf,'units','normalized','outerposition',[0 0 1 1])
+    ylabel({'y-Axis'})
+    xlabel({'x-Axis'})
+
     
     subplot(2,2,3)
     hold on
     
-    plot(1:50,gbests(:),'-')
-    axis([1 50 -1 max(gbests(:))]);
+    plot(1:cfg.iterations,gbests(:),'-')
+    axis([1 cfg.iterations -1 max(gbests(:))]);
     hold off
     axis auto
     title('Convergence Plot for normal PSO')
-    
-    set(gcf,'units','normalized','outerposition',[0 0 1 1])
+    ylabel({'f(Globalbest)'})
+    xlabel({'Iterations'})  
+
     
     subplot(2,2,4)
     hold on
-    plot(1:50,gbestsV(:),'-')
-    axis([1 50 -1 max(gbestsV(:))]);
+    plot(1:cfg.iterations,gbestsV(:),'-')
+    axis([1 cfg.iterations -1 max(gbestsV(:))]);
     hold off
     axis auto
     title('Convergence Plot for PSO considering the vectorfield')
+    ylabel({'f(Globalbest)'})
+    xlabel({'Iterations'})
+    
     
     set(gcf,'units','normalized','outerposition',[0 0 1 1])
 %     subplot(1,3,2)
