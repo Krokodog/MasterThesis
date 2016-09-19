@@ -63,12 +63,16 @@ end
 
 
 [vMap]=createVectorMap(cfg,grid,vx,vy);
-vMap(:,:,1)
-vMap(:,:,2)
-imagesc(transpose(vMap(:,:,1)))
-set(gca,'YDir','normal')
+%vMap=zeros(grid.xMax+1,grid.yMax+1,1);
+%[matPos1,matPos3]=PSO(cfg,grid,x,y,vx,vy,modeVF,vMap);
+x=-5:0.1:5;
+y=-5:0.1:5;
 
-%[matPos1,matPos3]=PSO(cfg,grid,x,y,vx,vy,modeVF);
+ackley(x,y);
+rosenbrock(x,y)
+rastrigin(x,y);
+
 %visualizeVisitedPositions(matPos1,matPos3);
-
-
+% figure
+% imagesc(transpose(vMap(:,:,1)))
+% set(gca,'YDir','normal')

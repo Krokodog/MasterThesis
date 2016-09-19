@@ -17,6 +17,7 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     hold on
     contour(x,y,z,20);
     plot(pos_velocity(:,1),pos_velocity(:,2),'o')
+    plot(17,4,'*')
     axis([xMin xMax yMin yMax]);
     quiver(x,y,a,b);
     hold off

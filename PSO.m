@@ -1,12 +1,14 @@
-function [mPos1,mPos2] = PSO(cfg,grid,x,y,vx,vy,modeVF)
+function [mPos1,mPos2] = PSO(cfg,grid,x,y,vx,vy,modeVF,vMap)
 %PSO Summary of this function goes here
 %   Detailed explanation goes here
+
+setCorrection=1;
 
 [x,y]=meshgrid(x,y);
 
 % Change the coordinates of the objective function
 uSub=17;
-vSub=2;
+vSub=4;
 
 % Sphere Function
 z=(x-uSub).^2 + ( y-vSub).^2;
@@ -53,7 +55,7 @@ cfg.swarm(:, 7)=1000;
 cfg.swarmV = cfg.swarm;
 
 
-for iter = 1:cfg.iterations   
+for iter = 1:cfg.iterations
     for i= 1:cfg.swarmSize
         tmpPos1x=ceil(cfg.swarm(i,1));
         tmpPos1y=ceil(cfg.swarm(i,2));
@@ -74,7 +76,7 @@ for iter = 1:cfg.iterations
             cfg.swarm(i,4) = cfg.swarm (i,2);
             cfg.swarm(i,7) = value;
         end
-
+        
         tmpPos2x=ceil(cfg.swarmV(i,1));
         tmpPos2y=ceil(cfg.swarmV(i,2));
         
@@ -83,15 +85,31 @@ for iter = 1:cfg.iterations
         end
         
         %x(t+1)=v(t+1)+x(t)
-        if((cfg.swarmV(i,1)+cfg.swarmV(i,5))<0 ||(cfg.swarmV(i,1)+cfg.swarmV(i,5))>20)
-            cfg.swarmV(i,1)=randi([0,20]);
+        %with correction
+        if((setCorrection==1) && cfg.swarmV(i,1)>=0 &&cfg.swarmV(i,1)<=20&&cfg.swarmV(i,2)>=0 &&cfg.swarmV(i,2)<=20)
+            xCor=vMap(round(cfg.swarmV(i,1)+1),round(cfg.swarmV(i,2)+1),1);
+            yCor=vMap(round(cfg.swarmV(i,1)+1),round(cfg.swarmV(i,2)+1),2);
         else
-            cfg.swarmV(i,1) = cfg.swarmV(i,1)+cfg.swarmV(i,5);
+            xCor=0;
+            yCor=0;
         end
-        if((cfg.swarmV(i,2)+cfg.swarmV(i,6))<0 ||(cfg.swarmV(i,2)+cfg.swarmV(i,6))>20)
-            cfg.swarmV(i,2)=randi([0,20]);
+
+        if((cfg.swarmV(i,1)+cfg.swarmV(i,5))<0)
+            %cfg.swarmV(i,1)=randi([0,20]);
+            cfg.swarmV(i,1)=0;
+        elseif((cfg.swarmV(i,1)+cfg.swarmV(i,5))>20)
+            cfg.swarmV(i,1)=20;
         else
-            cfg.swarmV(i,2) = cfg.swarmV(i,2)+cfg.swarmV(i,6);
+            cfg.swarmV(i,1) = cfg.swarmV(i,1)+cfg.swarmV(i,5)+xCor;
+        end
+
+        if((cfg.swarmV(i,2)+cfg.swarmV(i,6))<0)
+           % cfg.swarmV(i,2)=randi([0,20]);
+            cfg.swarmV(i,2) = 0;
+        elseif((cfg.swarmV(i,2)+cfg.swarmV(i,6))>20)
+            cfg.swarmV(i,2) = 20;
+        else
+            cfg.swarmV(i,2) = cfg.swarmV(i,2)+cfg.swarmV(i,6)+yCor;
         end
         uVelo = cfg.swarmV(i,1);
         vVelo = cfg.swarmV(i,2);
@@ -107,8 +125,9 @@ for iter = 1:cfg.iterations
         end
         
     end
+    cfg.swarmV
     %tmp is the value and gbest the index
-    [tmp, gbest] = min(cfg.swarm(:,7));  
+    [tmp, gbest] = min(cfg.swarm(:,7));
     [tmpV, gbestVelo] = min(cfg.swarmV(:,7));
     gbests(iter)=tmp;
     gbestsV(iter)=tmpV;
@@ -117,7 +136,7 @@ for iter = 1:cfg.iterations
             -cfg.swarm(i,1))+cfg.accelerationCoefficient*rand*(cfg.swarm(gbest,3)-cfg.swarm(i,1));
         cfg.swarm(i,6) = rand*cfg.inertia*cfg.swarm(i,6)+cfg.accelerationCoefficient*rand*(cfg.swarm(i,4)...
             -cfg.swarm(i,2))+cfg.accelerationCoefficient*rand*(cfg.swarm(gbest,4)-cfg.swarm(i,2));
-
+        
         
         if(cfg.swarmV(i,1) > 0 && cfg.swarmV(i,1) <=20 && cfg.swarmV(i,2) > 0 && cfg.swarmV(i,2) <=20 )
             [uV,vV]=getVector(cfg.swarmV(i,1),cfg.swarmV(i,2),vx,vy);
@@ -136,7 +155,7 @@ for iter = 1:cfg.iterations
         %clf
         
         h1=subplot(2,2,1);
-   
+        
         hold on
         contour(x,y,z,20);
         plot(cfg.swarm(:,1),cfg.swarm(:,2),'o')
@@ -144,7 +163,7 @@ for iter = 1:cfg.iterations
         hold off
         axis equal
         title('Normal PSO not considering the vectorfield')
-               
+        
         h2=subplot(2,2,2);
         hold on
         contour(x,y,z,20);
@@ -155,32 +174,32 @@ for iter = 1:cfg.iterations
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
         axis equal
         title('PSO considering the vectorfield')
-       
+        
         
         subplot(2,2,3)
         hold on
-
+        
         plot(iter,tmp,'b*')
         axis([1 cfg.iterations -1 100]);
-      
+        
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
-     %   axis equal
+        %   axis equal
         title('Convergence Plot for PSO')
         
         subplot(2,2,4)
-       
+        
         hold on
         plot(iter,tmpV,'b*')
         axis([1 cfg.iterations -1 100]);
         
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
-      %  axis equal
+        %  axis equal
         title('Convergence Plot for PSO considering PSO')
         
         pause(.2);
         if(iter~=cfg.iterations)
-        cla(h1)
-        cla(h2)
+            cla(h1)
+            cla(h2)
         end
     end
 end
