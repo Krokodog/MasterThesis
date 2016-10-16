@@ -1,34 +1,39 @@
-function [mPos1,mPos2] = PSO(cfg,grid,x,y,vx,vy,modeVF,vMap)
+function [mPos1,mPos2] = PSO(cfg,grid,x,y,vFieldx,vFieldy,vMap)
 %PSO Summary of this function goes here
 %   Detailed explanation goes here
 
 setCorrection=1;
 
-[x,y]=meshgrid(x,y);
+vxC=vFieldx;
+vyC=vFieldy;
 
 % Change the coordinates of the objective function
-uSub=17;
-vSub=4;
+uSub=26;
+vSub=2;
 
 % Sphere Function
 z=(x-uSub).^2 + ( y-vSub).^2;
 
-switch modeVF
-    case 1
-        %uniform vectorfield
-        vxC=-y./y;
-        vxC(isnan(vxC))=-1;
-        vyC=x./x;
-        vyC(isnan(vyC))=1;
-    case 2
-        %linear vectorfield
-        vxC=-y;
-        vyC=x;
-    case 3
-        %sincos vectorfield
-        vxC=sin(y)*0.8;
-        vyC=cos(x)*0.8;
-end
+% switch modeVF
+%     case 1
+%         %uniform vectorfield
+%         vxC=-y./y;
+%         vxC(isnan(vxC))=-1;
+%         vyC=x./x;
+%         vyC(isnan(vyC))=1;
+%     case 2
+%         %linear vectorfield
+%         vxC=-y;
+%         vyC=x;
+%     case 3
+%         %sincos vectorfield
+%         vxC=sin(y)*0.8;
+%         vyC=cos(x)*0.8;
+%     case 4
+%         %sincos vectorfield
+%         vxC=x./100;
+%         vyC=y;
+% end
 % Vectorfield contour grid
 %a=sin(y)*0.3;
 %b=cos(x)*0.2;
@@ -43,7 +48,7 @@ mPos2=mPos1;
 
 % Initialize the cfg.swarm
 for i = 1:cfg.swarmSize
-    cfg.swarm(i, 1:7) = i;
+    cfg.swarm(i, 1:7) = randi([1,grid.xMax]);
 end
 % initial velocity u
 cfg.swarm(:, 5)=0;
@@ -59,7 +64,7 @@ for iter = 1:cfg.iterations
     for i= 1:cfg.swarmSize
         tmpPos1x=ceil(cfg.swarm(i,1));
         tmpPos1y=ceil(cfg.swarm(i,2));
-        if(tmpPos1x>0 &&tmpPos1y >0 && tmpPos1x<=20 && tmpPos1y<=20)
+        if(tmpPos1x>grid.xMin &&tmpPos1y >grid.yMin && tmpPos1x<=grid.xMax && tmpPos1y<=grid.yMax)
             mPos1(tmpPos1x,tmpPos1y)=mPos1(tmpPos1x,tmpPos1y)+1;
         end
         %x(t+1)=v(t+1)+x(t)
@@ -80,13 +85,13 @@ for iter = 1:cfg.iterations
         tmpPos2x=ceil(cfg.swarmV(i,1));
         tmpPos2y=ceil(cfg.swarmV(i,2));
         
-        if(tmpPos2x>0 &&tmpPos2y >0 && tmpPos2x<20 && tmpPos2y<20)
+        if(tmpPos2x>grid.xMin &&tmpPos2y >grid.yMin && tmpPos2x<grid.xMax && tmpPos2y<grid.yMax)
             mPos2(tmpPos2x,tmpPos2y)=mPos2(tmpPos2x,tmpPos2y)+1;
         end
         
         %x(t+1)=v(t+1)+x(t)
         %with correction
-        if((setCorrection==1) && cfg.swarmV(i,1)>=0 &&cfg.swarmV(i,1)<=20&&cfg.swarmV(i,2)>=0 &&cfg.swarmV(i,2)<=20)
+        if((setCorrection==1) && cfg.swarmV(i,1)>=grid.xMin &&cfg.swarmV(i,1)<=grid.xMax &&cfg.swarmV(i,2)>=grid.yMin &&cfg.swarmV(i,2)<=grid.yMax)
             xCor=vMap(round(cfg.swarmV(i,1)+1),round(cfg.swarmV(i,2)+1),1);
             yCor=vMap(round(cfg.swarmV(i,1)+1),round(cfg.swarmV(i,2)+1),2);
         else
@@ -94,20 +99,20 @@ for iter = 1:cfg.iterations
             yCor=0;
         end
 
-        if((cfg.swarmV(i,1)+cfg.swarmV(i,5))<0)
+        if((cfg.swarmV(i,1)+cfg.swarmV(i,5))<grid.xMin)
             %cfg.swarmV(i,1)=randi([0,20]);
-            cfg.swarmV(i,1)=0;
-        elseif((cfg.swarmV(i,1)+cfg.swarmV(i,5))>20)
-            cfg.swarmV(i,1)=20;
+            cfg.swarmV(i,1)=grid.xMin;
+        elseif((cfg.swarmV(i,1)+cfg.swarmV(i,5))>grid.xMax)
+            cfg.swarmV(i,1)=grid.xMax;
         else
             cfg.swarmV(i,1) = cfg.swarmV(i,1)+cfg.swarmV(i,5)+xCor;
         end
 
-        if((cfg.swarmV(i,2)+cfg.swarmV(i,6))<0)
+        if((cfg.swarmV(i,2)+cfg.swarmV(i,6))<grid.yMin)
            % cfg.swarmV(i,2)=randi([0,20]);
-            cfg.swarmV(i,2) = 0;
-        elseif((cfg.swarmV(i,2)+cfg.swarmV(i,6))>20)
-            cfg.swarmV(i,2) = 20;
+            cfg.swarmV(i,2) = grid.yMin;
+        elseif((cfg.swarmV(i,2)+cfg.swarmV(i,6))>grid.yMax)
+            cfg.swarmV(i,2) = grid.yMax;
         else
             cfg.swarmV(i,2) = cfg.swarmV(i,2)+cfg.swarmV(i,6)+yCor;
         end
@@ -125,7 +130,7 @@ for iter = 1:cfg.iterations
         end
         
     end
-    cfg.swarmV
+    %cfg.swarmV
     %tmp is the value and gbest the index
     [tmp, gbest] = min(cfg.swarm(:,7));
     [tmpV, gbestVelo] = min(cfg.swarmV(:,7));
@@ -138,8 +143,8 @@ for iter = 1:cfg.iterations
             -cfg.swarm(i,2))+cfg.accelerationCoefficient*rand*(cfg.swarm(gbest,4)-cfg.swarm(i,2));
         
         
-        if(cfg.swarmV(i,1) > 0 && cfg.swarmV(i,1) <=20 && cfg.swarmV(i,2) > 0 && cfg.swarmV(i,2) <=20 )
-            [uV,vV]=getVector(cfg.swarmV(i,1),cfg.swarmV(i,2),vx,vy);
+        if(cfg.swarmV(i,1) > grid.xMin && cfg.swarmV(i,1) <=grid.xMax && cfg.swarmV(i,2) > grid.yMin && cfg.swarmV(i,2) <=grid.yMax )
+            [uV,vV]=getVector(cfg.swarmV(i,1),cfg.swarmV(i,2),vFieldx,vFieldy,grid);
         else
             uV=0;
             vV=0;
@@ -205,7 +210,7 @@ for iter = 1:cfg.iterations
 end
 
 if(~cfg.visualizeSteps)
-    visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV,cfg)
+    visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV,cfg,uSub,vSub)
 end
 end
 

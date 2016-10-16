@@ -1,4 +1,4 @@
-function [u,v] = getVector(x,y,a,b)
+function [u,v] = getVector(x,y,vFieldx,vFieldy,grid)
 %GETVECTOR Calculate the precise velocity vector
 %   x and y coordinates
 %   a and b velocity components in x- and y-direction
@@ -7,17 +7,17 @@ u=0;
 v=0;
 
 %Boundary handling
-if(x < 1)
-    x=0;
+if(x < grid.xMin+1)
+    x=grid.xMin;
 end
-if(x > 20)
-    x=20;
+if(x > grid.xMax)
+    x=grid.xMax;
 end
-if(y < 1)
-    y=0;
+if(y < grid.yMin+1)
+    y=grid.yMin;
 end
-if(y > 20)
-    y=20;
+if(y > grid.yMax)
+    y=grid.yMax;
 end
 
 %index handling
@@ -31,11 +31,12 @@ p01=[floor(x),ceil(y)];
 p11=[ceil(x),ceil(y)];
     
 %Velocity at grid points
-v1=[a(p00(1)),b(p00(2))];
-v2=[a(p01(1)),b(p01(2))];
-v3=[a(p10(1)),b(p10(2))];
-v4=[a(p11(1)),b(p11(2))];
-    
+
+v1=[vFieldx(size(vFieldx,1)+1-p00(1),p00(1)),vFieldy(size(vFieldy,1)+1-p00(2),p00(2))];
+v2=[vFieldx(size(vFieldx,1)+1-p01(1),p01(1)),vFieldy(size(vFieldy,1)+1-p01(2),p01(2))];
+v3=[vFieldx(size(vFieldx,1)+1-p10(1),p10(1)),vFieldy(size(vFieldy,1)+1-p10(2),p10(2))];
+v4=[vFieldx(size(vFieldx,1)+1-p11(1),p11(1)),vFieldy(size(vFieldy,1)+1-p11(2),p11(2))];
+
 % 3 cases:
 %1. On 1 gridpoint
 %2. Between 2 gridpoints
@@ -48,8 +49,8 @@ fractY=rem(y,1);
 
 %Case 1
 if fractX == 0 && fractY==0
-    u = a(x);
-    v = b(y);
+    u = vFieldx(size(vFieldx,1)+1-x,x);
+    v = vFieldx(size(vFieldx,1)+1-y,y);
 end
 
 %Case 2 in x-direction

@@ -1,4 +1,4 @@
-function [] = visualizeVisitedPositions(matPos1,matPos3)
+function [] = visualizeVisitedPositions(matPos1,matPos3,grid)
  figure
     colormap('hot');
     cmap = colormap;
@@ -7,7 +7,7 @@ function [] = visualizeVisitedPositions(matPos1,matPos3)
     subplot(1,2,1)
     imagesc(transpose(matPos1))
     axis equal
-    axis([1 20 1 20]);
+    axis([1 grid.xMax 1 grid.yMax]);
     colorbar('Ticks',[0,max(matPos1(:))])
     set(gca,'YDir','normal')
     ylabel({'y-Axis'})
@@ -16,7 +16,7 @@ function [] = visualizeVisitedPositions(matPos1,matPos3)
     subplot(1,2,2)
     imagesc(transpose(matPos3))
     axis equal
-    axis([1 20 1 20]);
+    axis([1 grid.xMax 1 grid.yMax]);
     colorbar('Ticks',[0,max(matPos3(:))])
     set(gca,'YDir','normal')
     ylabel({'y-Axis'})

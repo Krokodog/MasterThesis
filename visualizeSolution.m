@@ -1,4 +1,4 @@
-function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yMax,a,b,gbests,gbestsV,cfg)
+function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yMax,a,b,gbests,gbestsV,cfg,uS,vS)
 %VISUALIZESOLUTION Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -17,7 +17,7 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     hold on
     contour(x,y,z,20);
     plot(pos_velocity(:,1),pos_velocity(:,2),'o')
-    plot(17,4,'*')
+    plot(uS,vS,'*')
     axis([xMin xMax yMin yMax]);
     quiver(x,y,a,b);
     hold off
@@ -31,7 +31,7 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     hold on
     
     plot(1:cfg.iterations,gbests(:),'-')
-    axis([1 cfg.iterations -1 max(gbests(:))]);
+    axis([1 (cfg.searchTime+cfg.iterations) -1 max(gbests(:))]);
     hold off
     axis auto
     title('Convergence Plot for normal PSO')
@@ -41,8 +41,9 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     
     subplot(2,2,4)
     hold on
-    plot(1:cfg.iterations,gbestsV(:),'-')
-    axis([1 cfg.iterations -1 max(gbestsV(:))]);
+    C = vertcat(zeros(cfg.searchTime,1)+max(gbestsV(:)),gbestsV(:));
+    plot(1:(cfg.searchTime+cfg.iterations),C,'-')
+    axis([1 (cfg.searchTime+cfg.iterations) -1 max(gbestsV(:))]);
     hold off
     axis auto
     title('Convergence Plot for PSO considering the vectorfield')
