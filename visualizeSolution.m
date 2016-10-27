@@ -1,5 +1,6 @@
 function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yMax,a,b,gbests,gbestsV,cfg,uS,vS)
-%VISUALIZESOLUTION Summary of this function goes here
+%VISUALIZESOLUTION Visualize the solution of both pso and it belonging
+%convergence plot
 %   Detailed explanation goes here
 
     subplot(2,2,1)
@@ -25,7 +26,6 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     title('PSO considering the vectorfield')
     ylabel({'y-Axis'})
     xlabel({'x-Axis'})
-
     
     subplot(2,2,3)
     hold on
@@ -52,17 +52,6 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
     
     
     set(gcf,'units','normalized','outerposition',[0 0 1 1])
-%     subplot(1,3,2)
-%     hold on
-%     contour(x,y,z,20);
-%     plot(pos_average(:,1),pos_average(:,2),'o')
-%     axis([xMin xMax yMin yMax]);
-%     quiver(x,y,a,b);
-%     hold off
-%     axis equal
-%     title('PSO considering the estimated vectorfield')
     
-
-
 end
 

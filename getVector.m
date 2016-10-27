@@ -1,7 +1,7 @@
 function [u,v] = getVector(x,y,vFieldx,vFieldy,grid)
-%GETVECTOR Calculate the precise velocity vector
-%   x and y coordinates
-%   a and b velocity components in x- and y-direction
+%GETVECTOR Calculate the precise velocity vector, using interpolation
+%   x and y coordinates of the individual
+%   vFieldx and vFieldy velocity fields in x- and y-direction
 
 u=0;
 v=0;
@@ -20,28 +20,27 @@ if(y > grid.yMax)
     y=grid.yMax;
 end
 
-%index handling
+% Index handling
 x=x+1;
 y=y+1;
 
-%Grid points
+% Grid points
 p00=[floor(x),floor(y)];
 p10=[ceil(x),floor(y)];
 p01=[floor(x),ceil(y)];
 p11=[ceil(x),ceil(y)];
     
-%Velocity at grid points
-
+% Velocity at grid points
 v1=[vFieldx(size(vFieldx,1)+1-p00(1),p00(1)),vFieldy(size(vFieldy,1)+1-p00(2),p00(2))];
 v2=[vFieldx(size(vFieldx,1)+1-p01(1),p01(1)),vFieldy(size(vFieldy,1)+1-p01(2),p01(2))];
 v3=[vFieldx(size(vFieldx,1)+1-p10(1),p10(1)),vFieldy(size(vFieldy,1)+1-p10(2),p10(2))];
 v4=[vFieldx(size(vFieldx,1)+1-p11(1),p11(1)),vFieldy(size(vFieldy,1)+1-p11(2),p11(2))];
 
-% 3 cases:
-%1. On 1 gridpoint
-%2. Between 2 gridpoints
-%3. In a cell of 4 gridpoints
-%Use interpolation v=(1-t)*p1+t*p2 , t e[0,1]
+% There are three cases:
+% 1. On 1 gridpoint
+% 2. Between 2 gridpoints
+% 3. In a cell of 4 gridpoints
+% Use interpolation v=(1-t)*p1+t*p2 , t e[0,1]
 
 %rem = remainder, get the grid vertices
 fractX=rem(x,1);

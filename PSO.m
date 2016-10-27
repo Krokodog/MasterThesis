@@ -1,52 +1,30 @@
 function [mPos1,mPos2] = PSO(cfg,grid,x,y,vFieldx,vFieldy,vMap)
-%PSO Summary of this function goes here
-%   Detailed explanation goes here
+%PSO Particle swarm optimazation
+%   The variable swarm is used for the normal PSO and swarmV is used for
+%   the PSO considering the vectorfield
 
+% Variable to see the differences between a correction and without
 setCorrection=1;
 
+% For the contour plot
 vxC=vFieldx;
 vyC=vFieldy;
 
-% Change the coordinates of the objective function
+% Change the coordinates of the objective function, should be between min
+% and max size
 uSub=26;
-vSub=2;
+vSub=26;
 
 % Sphere Function
 z=(x-uSub).^2 + ( y-vSub).^2;
 
-% switch modeVF
-%     case 1
-%         %uniform vectorfield
-%         vxC=-y./y;
-%         vxC(isnan(vxC))=-1;
-%         vyC=x./x;
-%         vyC(isnan(vyC))=1;
-%     case 2
-%         %linear vectorfield
-%         vxC=-y;
-%         vyC=x;
-%     case 3
-%         %sincos vectorfield
-%         vxC=sin(y)*0.8;
-%         vyC=cos(x)*0.8;
-%     case 4
-%         %sincos vectorfield
-%         vxC=x./100;
-%         vyC=y;
-% end
-% Vectorfield contour grid
-%a=sin(y)*0.3;
-%b=cos(x)*0.2;
-
-
-
-% Visulize the grid cells
-%normal
+% Needed if you want to viualize the visited cells.
+% normal PSO
 mPos1=zeros(grid.xMax,grid.yMax);
-%real
+% PSO with wind
 mPos2=mPos1;
 
-% Initialize the cfg.swarm
+% Initialize the positions of the individuals
 for i = 1:cfg.swarmSize
     cfg.swarm(i, 1:7) = randi([1,grid.xMax]);
 end
@@ -54,19 +32,21 @@ end
 cfg.swarm(:, 5)=0;
 % initial velocity v
 cfg.swarm(:, 6)=0;
-cfg.swarm(:, 7)=1000;
-
+cfg.swarm(:, 7)=1000000;
 
 cfg.swarmV = cfg.swarm;
 
 
 for iter = 1:cfg.iterations
     for i= 1:cfg.swarmSize
+        
+        % Store the visited cells in mPos1
         tmpPos1x=ceil(cfg.swarm(i,1));
         tmpPos1y=ceil(cfg.swarm(i,2));
         if(tmpPos1x>grid.xMin &&tmpPos1y >grid.yMin && tmpPos1x<=grid.xMax && tmpPos1y<=grid.yMax)
             mPos1(tmpPos1x,tmpPos1y)=mPos1(tmpPos1x,tmpPos1y)+1;
         end
+        
         %x(t+1)=v(t+1)+x(t)
         cfg.swarm(i,1) = cfg.swarm(i,1)+cfg.swarm(i,5);
         cfg.swarm(i,2) = cfg.swarm(i,2)+cfg.swarm(i,6);
@@ -82,6 +62,7 @@ for iter = 1:cfg.iterations
             cfg.swarm(i,7) = value;
         end
         
+        % Analogous to the normal PSO
         tmpPos2x=ceil(cfg.swarmV(i,1));
         tmpPos2y=ceil(cfg.swarmV(i,2));
         
@@ -99,6 +80,9 @@ for iter = 1:cfg.iterations
             yCor=0;
         end
 
+        % Boundary handling. Particles exceeding the boundaries will be set
+        % to the min/max value of the grid
+        
         if((cfg.swarmV(i,1)+cfg.swarmV(i,5))<grid.xMin)
             %cfg.swarmV(i,1)=randi([0,20]);
             cfg.swarmV(i,1)=grid.xMin;
@@ -130,13 +114,14 @@ for iter = 1:cfg.iterations
         end
         
     end
-    %cfg.swarmV
-    %tmp is the value and gbest the index
+    
+    %tmp is the value and gbest the index of the globalbest
     [tmp, gbest] = min(cfg.swarm(:,7));
     [tmpV, gbestVelo] = min(cfg.swarmV(:,7));
     gbests(iter)=tmp;
     gbestsV(iter)=tmpV;
     for i= 1:cfg.swarmSize
+        %Update v(t+1)
         cfg.swarm(i,5) = rand*cfg.inertia*cfg.swarm(i,5)+cfg.accelerationCoefficient*rand*(cfg.swarm(i,3)...
             -cfg.swarm(i,1))+cfg.accelerationCoefficient*rand*(cfg.swarm(gbest,3)-cfg.swarm(i,1));
         cfg.swarm(i,6) = rand*cfg.inertia*cfg.swarm(i,6)+cfg.accelerationCoefficient*rand*(cfg.swarm(i,4)...
@@ -156,9 +141,8 @@ for iter = 1:cfg.iterations
         
     end
     
+    % Visualize the searching of the swarm. Can be set in the main script.
     if(cfg.visualizeSteps)
-        %clf
-        
         h1=subplot(2,2,1);
         
         hold on
@@ -179,8 +163,7 @@ for iter = 1:cfg.iterations
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
         axis equal
         title('PSO considering the vectorfield')
-        
-        
+      
         subplot(2,2,3)
         hold on
         
