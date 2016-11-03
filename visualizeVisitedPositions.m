@@ -7,7 +7,7 @@ function [] = visualizeVisitedPositions(matPos1,matPos3,grid)
     subplot(1,2,1)
     imagesc(transpose(matPos1))
     axis equal
-    axis([1 grid.xMax 1 grid.yMax]);
+    axis([1 abs(grid.xMin)+grid.xMax+1 1 abs(grid.yMin)+grid.yMax+1]);
     colorbar('Ticks',[0,max(matPos1(:))])
     set(gca,'YDir','normal')
     ylabel({'y-Axis'})
@@ -16,7 +16,7 @@ function [] = visualizeVisitedPositions(matPos1,matPos3,grid)
     subplot(1,2,2)
     imagesc(transpose(matPos3))
     axis equal
-    axis([1 grid.xMax 1 grid.yMax]);
+    axis([1 abs(grid.xMin)+grid.xMax+1 1 abs(grid.yMin)+grid.yMax+1]);
     colorbar('Ticks',[0,max(matPos3(:))])
     set(gca,'YDir','normal')
     ylabel({'y-Axis'})

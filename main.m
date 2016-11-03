@@ -22,13 +22,14 @@ clc
 
 %configuration
 %PSO variables
-cfg.iterations = 50;
+cfg.iterations = 25;
 cfg.inertia = 1;
 cfg.accelerationCoefficient = 1.0;
-cfg.swarmSize = 20;
+cfg.swarmSize = 30;
 cfg.swarm= zeros(cfg.swarmSize,7);
 %Search swarm variables
-cfg.searchSwarmSize = 20;
+cfg.inertiaep=1;
+cfg.searchSwarmSize = 30;
 cfg.searchTime=100;
 
 %Display each iteration step
@@ -36,49 +37,44 @@ cfg.visualizeSteps =0;
 
 %grid
 grid.epsylon=1;
-grid.xMin=0;
-grid.xMax=29;
-grid.yMin=0;
-grid.yMax=29;
+grid.xMin=-15;
+grid.xMax=15;
+grid.yMin=-15;
+grid.yMax=15;
 
 % Construct the grid
 x=grid.xMin:grid.epsylon:grid.xMax;
 y=grid.yMin:grid.epsylon:grid.yMax;
 [x,y]=meshgrid(x,y);
-vFieldx=x;
-vFieldy=y;
 
-% How many vector field in x and y direction. Size of the grid must be
-% divisible by the number of patches
-vPatchSize=6;
+% %reduce strength of field / normalize
+vFieldx=-x/max(x(:));
+vFieldy=y/max(y(:));
 
-%TODO optimize randomly generated vectorfield patches.Sometimes strange
-%behavior of the swarm. Check it.
-
-% Randomly generates a steady vectorfield for each patch. Force is between 
-% -(random value of range[0,1]+0,5)+ random value of range[0,1]+0,5)
-% just to avoid fields with 0 velocity
-for i=1:(grid.xMax+1)/vPatchSize:grid.xMax
-    for j=1:(grid.yMax+1)/vPatchSize:grid.yMax
-    vFieldx(i:i+(grid.xMax+1)/vPatchSize-1,j:j+(grid.yMax+1)/vPatchSize-1) =-(rand+0.5)*+(rand+0.5);
-    vFieldy(i:i+(grid.xMax+1)/vPatchSize-1,j:j+(grid.yMax+1)/vPatchSize-1) =-(rand+0.5)*+(rand+0.5);
-    end
-end
+%quiver(x,y,vFieldx,vFieldy);
 
 % Solution of the explorer swarm
-[vMap]=createVectorMap(cfg,grid,vFieldx,vFieldy);
+[vMap]=createVectorMap(cfg,grid,vFieldy,vFieldx,x,y);
 
+test1=0;
+test2=0;
 % Doing PSO
-[matPos1,matPos3]=PSO(cfg,grid,x,y,vFieldx,vFieldy,vMap);
-
-% Visualizes the visited cells by PSO of the grid
-%visualizeVisitedPositions(matPos1,matPos3,grid);
-
+for i=1:10
+[matPos1,matPos3,cfg]=PSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
+[avgNormal,avgWind]=calcCenter(cfg);
+test1=test1+avgNormal;
+test2=test2+avgWind;
+end
+test1/10
+test2/10
 % Shows the correction value of each cell visited by any individual of the
 % swarm
 figure
 imagesc(transpose(vMap(:,:,1)))
 set(gca,'YDir','normal')
+
+% Visualizes the visited cells by PSO of the grid
+% visualizeVisitedPositions(matPos1,matPos3,grid);
 
 % Three optimization function, which will be used later for testing
 % x=-5:0.1:5;

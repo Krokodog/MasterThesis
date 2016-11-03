@@ -1,10 +1,14 @@
-function [mPos1,mPos2] = PSO(cfg,grid,x,y,vFieldx,vFieldy,vMap)
+function [mPos1,mPos2,cfg] = PSO(cfg,grid,x,y,vFieldx,vFieldy,vMap)
 %PSO Particle swarm optimazation
 %   The variable swarm is used for the normal PSO and swarmV is used for
 %   the PSO considering the vectorfield
 
 % Variable to see the differences between a correction and without
+% Using the correction-value of the explorer-population
 setCorrection=1;
+
+% Full information of the vector field
+setFullInformation=0;
 
 % For the contour plot
 vxC=vFieldx;
@@ -12,21 +16,21 @@ vyC=vFieldy;
 
 % Change the coordinates of the objective function, should be between min
 % and max size
-uSub=26;
-vSub=26;
+uSub=13;
+vSub=-10;
 
 % Sphere Function
 z=(x-uSub).^2 + ( y-vSub).^2;
 
 % Needed if you want to viualize the visited cells.
 % normal PSO
-mPos1=zeros(grid.xMax,grid.yMax);
+mPos1=zeros(abs(grid.xMin)+grid.xMax+1,abs(grid.yMin)+grid.yMax+1);
 % PSO with wind
 mPos2=mPos1;
 
 % Initialize the positions of the individuals
 for i = 1:cfg.swarmSize
-    cfg.swarm(i, 1:7) = randi([1,grid.xMax]);
+    cfg.swarm(i, 1:7) = randi([grid.xMin,grid.xMax]);
 end
 % initial velocity u
 cfg.swarm(:, 5)=0;
@@ -44,7 +48,7 @@ for iter = 1:cfg.iterations
         tmpPos1x=ceil(cfg.swarm(i,1));
         tmpPos1y=ceil(cfg.swarm(i,2));
         if(tmpPos1x>grid.xMin &&tmpPos1y >grid.yMin && tmpPos1x<=grid.xMax && tmpPos1y<=grid.yMax)
-            mPos1(tmpPos1x,tmpPos1y)=mPos1(tmpPos1x,tmpPos1y)+1;
+            mPos1(tmpPos1x+abs(grid.xMin)+1,tmpPos1y+abs(grid.yMin)+1)=mPos1(tmpPos1x+abs(grid.xMin)+1,tmpPos1y+abs(grid.yMin)+1)+1;
         end
         
         %x(t+1)=v(t+1)+x(t)
@@ -67,14 +71,22 @@ for iter = 1:cfg.iterations
         tmpPos2y=ceil(cfg.swarmV(i,2));
         
         if(tmpPos2x>grid.xMin &&tmpPos2y >grid.yMin && tmpPos2x<grid.xMax && tmpPos2y<grid.yMax)
-            mPos2(tmpPos2x,tmpPos2y)=mPos2(tmpPos2x,tmpPos2y)+1;
+            mPos2(tmpPos2x+abs(grid.xMin)+1,tmpPos2y+abs(grid.yMin)+1)=mPos2(tmpPos2x+abs(grid.xMin)+1,tmpPos2y+abs(grid.yMin)+1)+1;
         end
         
         %x(t+1)=v(t+1)+x(t)
         %with correction
         if((setCorrection==1) && cfg.swarmV(i,1)>=grid.xMin &&cfg.swarmV(i,1)<=grid.xMax &&cfg.swarmV(i,2)>=grid.yMin &&cfg.swarmV(i,2)<=grid.yMax)
-            xCor=vMap(round(cfg.swarmV(i,1)+1),round(cfg.swarmV(i,2)+1),1);
-            yCor=vMap(round(cfg.swarmV(i,1)+1),round(cfg.swarmV(i,2)+1),2);
+            xCor=vMap(round(cfg.swarmV(i,2)+abs(grid.yMin)+1),round(cfg.swarmV(i,1)+abs(grid.xMin)+1),1);
+            yCor=vMap(round(cfg.swarmV(i,2)+abs(grid.yMin)+1),round(cfg.swarmV(i,1)+abs(grid.xMin)+1),2);
+            cfg.swarmV(i,5)= cfg.swarmV(i,5) -xCor;
+            cfg.swarmV(i,6)= cfg.swarmV(i,6) -yCor;
+        end
+        
+        if((setFullInformation==1) && cfg.swarmV(i,1)>=grid.xMin &&cfg.swarmV(i,1)<=grid.xMax &&cfg.swarmV(i,2)>=grid.yMin &&cfg.swarmV(i,2)<=grid.yMax)
+            [xCor,yCor]=getVector(cfg.swarmV(i,1),cfg.swarmV(i,2),vFieldx,vFieldy,grid);
+             cfg.swarmV(i,5)= cfg.swarmV(i,5) -xCor;
+             cfg.swarmV(i,6)= cfg.swarmV(i,6) -yCor;
         else
             xCor=0;
             yCor=0;
@@ -134,9 +146,9 @@ for iter = 1:cfg.iterations
             uV=0;
             vV=0;
         end
-        cfg.swarmV(i,5) = rand*cfg.inertia*cfg.swarmV(i,5)+cfg.accelerationCoefficient*rand*(cfg.swarmV(i,3)...
+        cfg.swarmV(i,5) = rand*cfg.inertiaep*cfg.swarmV(i,5)+cfg.accelerationCoefficient*rand*(cfg.swarmV(i,3)...
             -cfg.swarmV(i,1))+cfg.accelerationCoefficient*rand*(cfg.swarmV(gbestVelo,3)-cfg.swarmV(i,1))+uV;
-        cfg.swarmV(i,6) = rand*cfg.inertia*cfg.swarmV(i,6)+cfg.accelerationCoefficient*rand*(cfg.swarmV(i,4)...
+        cfg.swarmV(i,6) = rand*cfg.inertiaep*cfg.swarmV(i,6)+cfg.accelerationCoefficient*rand*(cfg.swarmV(i,4)...
             -cfg.swarmV(i,2))+cfg.accelerationCoefficient*rand*(cfg.swarmV(gbestVelo,4)-cfg.swarmV(i,2))+vV;
         
     end

@@ -6,6 +6,7 @@ function [u,v] = getVector(x,y,vFieldx,vFieldy,grid)
 u=0;
 v=0;
 
+
 %Boundary handling
 if(x < grid.xMin+1)
     x=grid.xMin;
@@ -20,21 +21,20 @@ if(y > grid.yMax)
     y=grid.yMax;
 end
 
-% Index handling
-x=x+1;
-y=y+1;
-
 % Grid points
 p00=[floor(x),floor(y)];
 p10=[ceil(x),floor(y)];
 p01=[floor(x),ceil(y)];
 p11=[ceil(x),ceil(y)];
-    
+
+vSize=size(vFieldx,1);
+shift=abs(grid.xMin);
+
 % Velocity at grid points
-v1=[vFieldx(size(vFieldx,1)+1-p00(1),p00(1)),vFieldy(size(vFieldy,1)+1-p00(2),p00(2))];
-v2=[vFieldx(size(vFieldx,1)+1-p01(1),p01(1)),vFieldy(size(vFieldy,1)+1-p01(2),p01(2))];
-v3=[vFieldx(size(vFieldx,1)+1-p10(1),p10(1)),vFieldy(size(vFieldy,1)+1-p10(2),p10(2))];
-v4=[vFieldx(size(vFieldx,1)+1-p11(1),p11(1)),vFieldy(size(vFieldy,1)+1-p11(2),p11(2))];
+v1=[vFieldx(p00(2)+shift+1,(shift+p00(1)+1)),vFieldy(p00(2)+shift+1,(shift+p00(1)+1))];
+v2=[vFieldx(p01(2)+shift+1,(shift+p01(1)+1)),vFieldy(p01(2)+shift+1,(shift+p01(1)+1))];
+v3=[vFieldx(p10(2)+shift+1,(shift+p10(1)+1)),vFieldy(p10(2)+shift+1,(shift+p10(1)+1))];
+v4=[vFieldx(p11(2)+shift+1,(shift+p11(1)+1)),vFieldy(p11(2)+shift+1,(shift+p11(1)+1))];
 
 % There are three cases:
 % 1. On 1 gridpoint
@@ -48,8 +48,8 @@ fractY=rem(y,1);
 
 %Case 1
 if fractX == 0 && fractY==0
-    u = vFieldx(size(vFieldx,1)+1-x,x);
-    v = vFieldx(size(vFieldx,1)+1-y,y);
+    u = vFieldx((abs(grid.xMin)+x+1),x+abs(grid.xMin)+1);
+    v = vFieldy((abs(grid.yMin)+y+1),y+abs(grid.yMin)+1);
 end
 
 %Case 2 in x-direction
