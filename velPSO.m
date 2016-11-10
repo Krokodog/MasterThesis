@@ -1,14 +1,12 @@
-function [mPos1,mPos2,cfg] = PSO(cfg,grid,x,y,vFieldx,vFieldy,vMap)
-%PSO Particle swarm optimazation
-%   The variable swarm is used for the normal PSO and swarmV is used for
-%   the PSO considering the vectorfield
+function [mPos2] = velPSO(cfg,grid,x,y,vFieldx,vFieldy,vMap)
+%VELPSO Particle swarm optimazation considering the vector field
 
 % Variable to see the differences between a correction and without
 % Using the correction-value of the explorer-population
 setCorrection=0;
 
 % Full information of the vector field
-setFullInformation=0;
+setFullInformation=1;
 
 % For the contour plot
 vxC=vFieldx;
@@ -16,17 +14,14 @@ vyC=vFieldy;
 
 % Change the coordinates of the objective function, should be between min
 % and max size
-uSub=13;
-vSub=-10;
+uSub=10;
+vSub=5;
 
 % Sphere Function
 z=(x-uSub).^2 + ( y-vSub).^2;
 
-% Needed if you want to viualize the visited cells.
-% normal PSO
-mPos1=zeros(abs(grid.xMin)+grid.xMax+1,abs(grid.yMin)+grid.yMax+1);
 % PSO with wind
-mPos2=mPos1;
+mPos2=zeros(abs(grid.xMin)+grid.xMax+1,abs(grid.yMin)+grid.yMax+1);
 
 % Initialize the positions of the individuals
 for i = 1:cfg.swarmSize
@@ -44,29 +39,6 @@ cfg.swarmV = cfg.swarm;
 for iter = 1:cfg.iterations
     for i= 1:cfg.swarmSize
         
-        % Store the visited cells in mPos1
-        tmpPos1x=ceil(cfg.swarm(i,1));
-        tmpPos1y=ceil(cfg.swarm(i,2));
-        if(tmpPos1x>grid.xMin &&tmpPos1y >grid.yMin && tmpPos1x<=grid.xMax && tmpPos1y<=grid.yMax)
-            mPos1(tmpPos1x+abs(grid.xMin)+1,tmpPos1y+abs(grid.yMin)+1)=mPos1(tmpPos1x+abs(grid.xMin)+1,tmpPos1y+abs(grid.yMin)+1)+1;
-        end
-        
-        %x(t+1)=v(t+1)+x(t)
-        cfg.swarm(i,1) = cfg.swarm(i,1)+cfg.swarm(i,5);
-        cfg.swarm(i,2) = cfg.swarm(i,2)+cfg.swarm(i,6);
-        u = cfg.swarm(i,1);
-        v = cfg.swarm(i,2);
-        % Objective function
-        value = (u-uSub)^2 + ( v-vSub)^2;
-        if(value < cfg.swarm(i,7))
-            %update best pos u
-            cfg.swarm(i,3) = cfg.swarm (i,1);
-            %update best pos v
-            cfg.swarm(i,4) = cfg.swarm (i,2);
-            cfg.swarm(i,7) = value;
-        end
-        
-        % Analogous to the normal PSO
         tmpPos2x=ceil(cfg.swarmV(i,1));
         tmpPos2y=ceil(cfg.swarmV(i,2));
         
@@ -93,8 +65,7 @@ for iter = 1:cfg.iterations
         end
 
         % Boundary handling. Particles exceeding the boundaries will be set
-        % to the min/max value of the grid
-        
+        % to the min/max value of the grid      
         if((cfg.swarmV(i,1)+cfg.swarmV(i,5))<grid.xMin)
             %cfg.swarmV(i,1)=randi([0,20]);
             cfg.swarmV(i,1)=grid.xMin;
@@ -124,22 +95,14 @@ for iter = 1:cfg.iterations
             cfg.swarmV(i,4) = cfg.swarmV (i,2);
             cfg.swarmV(i,7) = valueVelo;
         end
-        
+
     end
     
-    %tmp is the value and gbest the index of the globalbest
-    [tmp, gbest] = min(cfg.swarm(:,7));
+%     %tmp is the value and gbest the index of the globalbest
     [tmpV, gbestVelo] = min(cfg.swarmV(:,7));
-    gbests(iter)=tmp;
     gbestsV(iter)=tmpV;
     for i= 1:cfg.swarmSize
         %Update v(t+1)
-        cfg.swarm(i,5) = rand*cfg.inertia*cfg.swarm(i,5)+cfg.accelerationCoefficient*rand*(cfg.swarm(i,3)...
-            -cfg.swarm(i,1))+cfg.accelerationCoefficient*rand*(cfg.swarm(gbest,3)-cfg.swarm(i,1));
-        cfg.swarm(i,6) = rand*cfg.inertia*cfg.swarm(i,6)+cfg.accelerationCoefficient*rand*(cfg.swarm(i,4)...
-            -cfg.swarm(i,2))+cfg.accelerationCoefficient*rand*(cfg.swarm(gbest,4)-cfg.swarm(i,2));
-        
-        
         if(cfg.swarmV(i,1) > grid.xMin && cfg.swarmV(i,1) <=grid.xMax && cfg.swarmV(i,2) > grid.yMin && cfg.swarmV(i,2) <=grid.yMax )
             [uV,vV]=getVector(cfg.swarmV(i,1),cfg.swarmV(i,2),vFieldx,vFieldy,grid);
         else
@@ -155,17 +118,9 @@ for iter = 1:cfg.iterations
     
     % Visualize the searching of the swarm. Can be set in the main script.
     if(cfg.visualizeSteps)
-        h1=subplot(2,2,1);
-        
-        hold on
-        contour(x,y,z,20);
-        plot(cfg.swarm(:,1),cfg.swarm(:,2),'o')
-        axis([grid.xMin grid.xMax grid.yMin grid.yMax]);
-        hold off
-        axis equal
-        title('Normal PSO not considering the vectorfield')
-        
-        h2=subplot(2,2,2);
+ 
+        h1=subplot(2,1,1);
+ 
         hold on
         contour(x,y,z,20);
         plot(cfg.swarmV(:,1),cfg.swarmV(:,2),'o')
@@ -175,37 +130,24 @@ for iter = 1:cfg.iterations
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
         axis equal
         title('PSO considering the vectorfield')
-      
-        subplot(2,2,3)
-        hold on
         
-        plot(iter,tmp,'b*')
-        axis([1 cfg.iterations -1 100]);
-        
-        set(gcf,'units','normalized','outerposition',[0 0 1 1])
-        %   axis equal
-        title('Convergence Plot for PSO')
-        
-        subplot(2,2,4)
-        
+        subplot(2,1,2)        
         hold on
         plot(iter,tmpV,'b*')
         axis([1 cfg.iterations -1 100]);
-        
         set(gcf,'units','normalized','outerposition',[0 0 1 1])
-        %  axis equal
         title('Convergence Plot for PSO considering PSO')
         
         pause(.2);
         if(iter~=cfg.iterations)
             cla(h1)
-            cla(h2)
         end
     end
 end
 
-% if(~cfg.visualizeSteps)
-%     visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV,cfg,uSub,vSub)
-% end
+if(~cfg.visualizeSteps)
+    visualizeSolution(0,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,0,gbestsV,cfg,uSub,vSub)
 end
+end
+
 

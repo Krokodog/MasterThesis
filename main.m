@@ -23,14 +23,14 @@ clc
 %configuration
 %PSO variables
 cfg.iterations = 25;
-cfg.inertia = 1;
+cfg.inertia =1;
 cfg.accelerationCoefficient = 1.0;
 cfg.swarmSize = 30;
 cfg.swarm= zeros(cfg.swarmSize,7);
 %Search swarm variables
 cfg.inertiaep=1;
 cfg.searchSwarmSize = 30;
-cfg.searchTime=100;
+cfg.searchTime=50;
 
 %Display each iteration step
 cfg.visualizeSteps =0;
@@ -48,30 +48,55 @@ y=grid.yMin:grid.epsylon:grid.yMax;
 [x,y]=meshgrid(x,y);
 
 % %reduce strength of field / normalize
-vFieldx=-x/max(x(:));
-vFieldy=y/max(y(:));
+vFieldx=x*1/max(x(:));
+vFieldy=y*1/max(y(:));
 
-%quiver(x,y,vFieldx,vFieldy);
+%normalPSO(cfg,grid,x,y);
 
 % Solution of the explorer swarm
 [vMap]=createVectorMap(cfg,grid,vFieldy,vFieldx,x,y);
+velPSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
 
-test1=0;
-test2=0;
-% Doing PSO
-for i=1:10
-[matPos1,matPos3,cfg]=PSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
-[avgNormal,avgWind]=calcCenter(cfg);
-test1=test1+avgNormal;
-test2=test2+avgWind;
-end
-test1/10
-test2/10
+
+% RECORD DATA AND EXPORT IT TO AN EXCEL-FILE
+% filename = 'dataV2NOInfoIW1.xlsx';
+% A = {'Algorithm','Swarm size','VMap','Vector field','Optimum','Inertia Weight','Center-X','Center-Y','Computing time not parallel','Deviation-x in %','Deviation-y in %';};
+% B={'nPSO','30','no','F(x,y)=(y,x)','(x=-13,y=10)';};
+% B2={'vPSO','30 +(30 at 50it )','NO','F(x,y)=(y,x)','(x=-13,y=10)';};
+% xlswrite(filename,A,1,'A1')
+% xlswrite(filename,B,1,'A2:E1001')
+% xlswrite(filename,A,2,'A1')
+% xlswrite(filename,B2,2,'A2:E1001')
+
+
+
+% dataMatrix=zeros(6);
+% dataMatrix2=zeros(6);
+
+% %Simulate 1000 times
+% for i=1:1000
+% tic
+% % Doing PSO
+% [matPos1,matPos3,cfg]=PSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
+% time=toc;
+% [avgNormal,avgWind]=calcCenter(cfg);
+% test1=avgNormal;
+% test2=avgWind;
+% dataMatrix(i,:)=[cfg.inertia,test1(1),test1(2),time,test1(1)/13*100-100,abs(test1(2))/10*100-100];
+% dataMatrix2(i,:)=[cfg.inertiaep,test2(1),test2(2),time,test2(1)/13*100-100,abs(test2(2))/10*100-100];
+% end
+% xlswrite(filename,dataMatrix,1,'F2:K1001')
+% xlswrite(filename,dataMatrix2,2,'F2:K1001')
+% disp('FINISHED')
+%test1/10
+%test2/10
+
+
 % Shows the correction value of each cell visited by any individual of the
 % swarm
-figure
-imagesc(transpose(vMap(:,:,1)))
-set(gca,'YDir','normal')
+% figure
+% imagesc(transpose(vMap(:,:,1)))
+% set(gca,'YDir','normal')
 
 % Visualizes the visited cells by PSO of the grid
 % visualizeVisitedPositions(matPos1,matPos3,grid);
