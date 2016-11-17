@@ -2,6 +2,7 @@ function [] = visualizeSolution( pos_normal,pos_velocity,x,y,z,xMin,xMax,yMin,yM
 %VISUALIZESOLUTION Visualize the solution of both pso and it belonging
 %convergence plot
 %   Detailed explanation goes here
+figure
 option1=false;
 option2=false;
 if(pos_velocity == 0)

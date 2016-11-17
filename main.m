@@ -1,5 +1,3 @@
-close all
-clear
 clc
 
 % Formular for a basic PSO
@@ -22,18 +20,39 @@ clc
 
 %configuration
 %PSO variables
-cfg.iterations = 25;
-cfg.inertia =1;
-cfg.accelerationCoefficient = 1.0;
-cfg.swarmSize = 30;
-cfg.swarm= zeros(cfg.swarmSize,7);
-%Search swarm variables
-cfg.inertiaep=1;
-cfg.searchSwarmSize = 30;
-cfg.searchTime=50;
 
+psoSwarmSize = evalin('base', 'psoSwarmSize');
+cfg.iterations = psoSwarmSize;
+
+iw1 = evalin('base', 'iw1');
+cfg.inertia =iw1;
+
+ac1 = evalin('base', 'ac1');
+cfg.accelerationCoefficient = ac1;
+
+psoSwarmSize = evalin('base', 'psoSwarmSize');
+cfg.swarmSize = psoSwarmSize;
+
+cfg.swarm= zeros(cfg.swarmSize,7);
+
+%Search swarm variables
+iw2 = evalin('base', 'iw2');
+cfg.inertiaep=iw2;
+
+epSwarmSize = evalin('base', 'epSwarmSize');
+cfg.searchSwarmSize = epSwarmSize;
+
+cfg.searchTime=50;
 %Display each iteration step
-cfg.visualizeSteps =0;
+showIterationSteps = evalin('base', 'showIterationSteps');
+cfg.visualizeSteps =showIterationSteps
+
+showSolution = evalin('base', 'showSolution');
+cfg.showSolution =showSolution;
+
+showVMap = evalin('base', 'showExploredArea');
+cfg.showVMap=showVMap;
+%---------------------------
 
 %grid
 grid.epsylon=1;
@@ -51,11 +70,11 @@ y=grid.yMin:grid.epsylon:grid.yMax;
 vFieldx=x*1/max(x(:));
 vFieldy=y*1/max(y(:));
 
-%normalPSO(cfg,grid,x,y);
+normalPSO(cfg,grid,x,y);
 
 % Solution of the explorer swarm
-[vMap]=createVectorMap(cfg,grid,vFieldy,vFieldx,x,y);
-velPSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
+%[vMap]=createVectorMap(cfg,grid,vFieldy,vFieldx,x,y);
+%velPSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
 
 
 % RECORD DATA AND EXPORT IT TO AN EXCEL-FILE
@@ -94,10 +113,11 @@ velPSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
 
 % Shows the correction value of each cell visited by any individual of the
 % swarm
-% figure
-% imagesc(transpose(vMap(:,:,1)))
-% set(gca,'YDir','normal')
-
+if(cfg.showVMap)
+figure
+imagesc(transpose(vMap(:,:,1)))
+set(gca,'YDir','normal')
+end
 % Visualizes the visited cells by PSO of the grid
 % visualizeVisitedPositions(matPos1,matPos3,grid);
 
@@ -107,4 +127,4 @@ velPSO(cfg,grid,x,y,vFieldy,vFieldx,vMap);
 % ackley(x,y);
 % rosenbrock(x,y)
 % rastrigin(x,y);
-
+disp('FINISHED')

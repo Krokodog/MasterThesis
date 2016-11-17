@@ -145,7 +145,7 @@ for iter = 1:cfg.iterations
     end
 end
 
-if(~cfg.visualizeSteps)
+if(cfg.showSolution)
     visualizeSolution(0,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,0,gbestsV,cfg,uSub,vSub)
 end
 end

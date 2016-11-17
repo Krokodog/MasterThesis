@@ -22,7 +22,7 @@ cfg.swarm(:, 5)=0;
 % initial velocity v
 cfg.swarm(:, 6)=0;
 cfg.swarm(:, 7)=1000000;
-
+gbest=0;
 for iter = 1:cfg.iterations
     for i= 1:cfg.swarmSize
         
@@ -85,7 +85,7 @@ for iter = 1:cfg.iterations
     end
 end
 
-if(~cfg.visualizeSteps)
+if(cfg.showSolution)
     visualizeSolution(cfg.swarm,0,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,0,0,gbests,0,cfg,uSub,vSub)
 end
 

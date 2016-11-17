@@ -204,8 +204,8 @@ for iter = 1:cfg.iterations
     end
 end
 
-% if(~cfg.visualizeSteps)
-%     visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV,cfg,uSub,vSub)
-% end
+if(cfg.showSolution)
+     visualizeSolution(cfg.swarm,cfg.swarmV,x,y,z,grid.xMin,grid.xMax,grid.yMin,grid.yMax,vxC,vyC,gbests,gbestsV,cfg,uSub,vSub)
+end
 end
 
